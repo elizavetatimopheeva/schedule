@@ -63,6 +63,7 @@
 
 
 
+import 'package:bsuir/logic/bloc/main_group/main_group_cubit.dart';
 import 'package:bsuir/ui/widgets/app/main_screen/main_screen_model.dart';
 import 'package:bsuir/ui/widgets/app/main_screen/main_screen_widget.dart';
 import 'package:bsuir/ui/widgets/app/main_teacher/main_teacher_model.dart';
@@ -72,6 +73,7 @@ import 'package:bsuir/ui/widgets/inherited/provider.dart';
 import 'package:bsuir/ui/widgets/app/main_group/main_group_model.dart';
 import 'package:bsuir/ui/widgets/app/main_group/main_group_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class MainNavigationRouteNames {
   static const mainGroup = '/lessons';
@@ -98,13 +100,13 @@ class MainNavigation {
         final arguments = settings.arguments;
         final groupNumber = arguments is int ? arguments : 0;
         return MaterialPageRoute(
-          builder: (context) {
-            return NotifierProvider(
-              create: () => MainGroupModel(groupNumber, ),
-              child: MainGroupScheduleWidget(),
-            );
-          },
-        );
+        builder: (context) {
+          return BlocProvider(
+            create: (context) => MainGroupCubit(groupNumber: groupNumber),
+            child: MainGroupScheduleWidget(groupNumber: groupNumber,),
+          );
+        },
+      );
         
       case MainNavigationRouteNames.mainTeacher:
         final arguments = settings.arguments;
