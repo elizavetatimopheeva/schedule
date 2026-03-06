@@ -1,0 +1,112 @@
+name: bsuir
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  link_text: ^0.2.1
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.3.2
+  intl: ^0.20.2
+  flutter_secure_storage: ^9.2.4
+  json_annotation: ^4.9.0
+  http: ^1.6.0
+  provider: ^6.1.5+1
+  hive_flutter: ^1.1.0
+  hive: ^2.2.3
+  path_provider: ^2.1.0
+  equatable: 
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  flutter_lints: ^5.0.0
+  json_serializable: ^6.11.1
+  build_runner: ^2.9.0
+  
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/
+  #   - images/a_dot_ham.jpeg
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  fonts:
+    - family: BasisGrotesquePro
+      fonts:
+        - asset: assets/fonts/basis_grotesque_pro/regular.ttf
+        - asset: assets/fonts/basis_grotesque_pro/medium.ttf
+          weight: 500
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/montserrat/regular.ttf
+        - asset: assets/fonts/montserrat/medium.ttf
+          weight: 500
+        - asset: assets/fonts/montserrat/semibold.ttf
+          weight: 600
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/raleway/regular.ttf
+        - asset: assets/fonts/raleway/medium.ttf
+          weight: 500
+        - asset: assets/fonts/raleway/light.ttf
+          weight: 300
+    - family: Steinbeck
+      fonts:
+        - asset: assets/fonts/steinbeck/regular.ttf
+    - family: SanFrancisco
+      fonts:
+        - asset: assets/fonts/san_francisco/regular.ttf
+        - asset: assets/fonts/san_francisco/medium.ttf
+          weight: 500
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
