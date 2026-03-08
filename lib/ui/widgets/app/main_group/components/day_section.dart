@@ -25,10 +25,7 @@ class DaySection extends StatelessWidget {
       margin: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          _buildLessonsList(),
-        ],
+        children: [_buildHeader(), _buildLessonsList()],
       ),
     );
   }
@@ -36,10 +33,7 @@ class DaySection extends StatelessWidget {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 5,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       decoration: BoxDecoration(color: AppColors.greyBackground),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -61,37 +55,25 @@ class DaySection extends StatelessWidget {
                         height: 1.3,
                       ),
                     ),
-                    if (data.isStartDay && semesterStarted)
-                      _buildTodayBadge(),
+                    if (data.isStartDay && semesterStarted) _buildTodayBadge(),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  data.weekNumber == 0
-                      ? 'Объявления'
-                      : '${data.dateDisplay}${!isExamView && data.weekNumber > 0 ? ', Неделя: ${data.forceWeekNumber ?? data.weekNumber}' : ''}',
-                  style: TextStyle(
-                    color: data.isSemesterEnded
-                        ? Colors.grey[600]
-                        : Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    height: 1.3,
-                  ),
-                ),
+
+                data.dateDisplay != null
+                    ? Text(
+                        data.dateDisplay!,
+                        style: TextStyle(
+                          color: data.isSemesterEnded
+                              ? Colors.grey[600]
+                              : const Color.fromARGB(255, 0, 0, 0),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
+                        ),
+                      )
+                    : SizedBox.shrink(),
               ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
-            ),
-            decoration: BoxDecoration(
-              color: data.isSemesterEnded
-                  ? Colors.grey[300]!
-                  : const Color(0xFFf3f2f8),
-              borderRadius: BorderRadius.circular(16),
             ),
           ),
         ],
@@ -102,10 +84,7 @@ class DaySection extends StatelessWidget {
   Widget _buildTodayBadge() {
     return Container(
       margin: const EdgeInsets.only(left: 8),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 2,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: AppColors.blue,
         borderRadius: BorderRadius.circular(10),

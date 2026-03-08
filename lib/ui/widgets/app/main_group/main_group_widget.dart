@@ -94,7 +94,7 @@
 //         _determineInitialViewType();
 //       });
 //     }
-    
+
 //     if (errorMessage != null) {
 //       return _buildErrorWidget(model!);
 //     }
@@ -462,10 +462,10 @@
 //       if (schedule.announcement == true) return true;
 
 //       final lessonType = schedule.lessonTypeAbbrev?.toLowerCase() ?? '';
-//       final isExam = schedule.lessonTypeAbbrev == 'экз' || 
+//       final isExam = schedule.lessonTypeAbbrev == 'экз' ||
 //                     lessonType.contains('экз') ||
 //                     lessonType.contains('exam');
-//       final isConsult = schedule.lessonTypeAbbrev == 'конс' || 
+//       final isConsult = schedule.lessonTypeAbbrev == 'конс' ||
 //                        lessonType.contains('конс') ||
 //                        lessonType.contains('консультация');
 //       return !isExam && !isConsult;
@@ -1063,8 +1063,6 @@
 //   }
 // }
 
-
-
 import 'package:bsuir/domain/entity/main_group.dart';
 
 import 'package:bsuir/logic/bloc/main_group/main_group_cubit.dart';
@@ -1072,6 +1070,7 @@ import 'package:bsuir/logic/bloc/main_group/main_group_state.dart';
 import 'package:bsuir/logic/models/schedule_models.dart';
 import 'package:bsuir/resourses/app_colors.dart';
 import 'package:bsuir/resourses/app_fonts.dart';
+import 'package:bsuir/services/subgroup_service.dart';
 import 'package:bsuir/ui/widgets/app/main_group/components/empty_state_widgets.dart';
 
 import 'package:bsuir/ui/widgets/app/main_group/views/daily_view.dart';
@@ -1119,7 +1118,11 @@ class _MainGroupScheduleWidgetState extends State<MainGroupScheduleWidget> {
     }
   }
 
-  void _onLessonTap(BuildContext context, MainGroupCubit cubit, DisplaySchedule schedule) {
+  void _onLessonTap(
+    BuildContext context,
+    MainGroupCubit cubit,
+    DisplaySchedule schedule,
+  ) {
     // showModalBottomSheet(
     //   context: context,
     //   builder: (ctx) => LessonInfo(cubit, schedule.original),
@@ -1165,39 +1168,173 @@ class _MainGroupScheduleWidgetState extends State<MainGroupScheduleWidget> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, MainGroupData state) {
-    final cubit = context.read<MainGroupCubit>();
+PreferredSizeWidget _buildAppBar(BuildContext context, MainGroupData state) {
+  final cubit = context.read<MainGroupCubit>();
 
-    return AppBar(
-      centerTitle: true,
-      title: Text(
-        '${widget.groupNumber}',
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 14,
-          height: 1.3,
-          fontFamily: AppFonts.montserrat,
-          fontWeight: FontWeight.w600,
+  return AppBar(
+    centerTitle: true,
+    title: Text(
+      '${widget.groupNumber}',
+      style: TextStyle(
+        color: Colors.black,
+        fontSize: 14,
+        height: 1.3,
+        fontFamily: AppFonts.montserrat,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    actions: [
+      // Иконка избранного
+      IconButton(
+        icon: Icon(
+          state.isFavorite ? Icons.star : Icons.star_border,
+          color: state.isFavorite ? Colors.amber : AppColors.blue,
+        ),
+        onPressed: () => cubit.toggleFavorite(),
+      ),
+      
+      // НОВАЯ ИКОНКА ДЛЯ ВЫБОРА ПОДГРУППЫ
+      _buildSubgroupButton(context, state, cubit),
+      
+      const SizedBox(width: 10),
+      
+      // Иконка группы (оставляем как есть)
+      const Icon(Icons.group_work, color: AppColors.blue),
+      const SizedBox(width: 10),
+      
+      // Меню выбора вида расписания
+      _buildViewTypeMenu(context, state, cubit),
+    ],
+    backgroundColor: AppColors.greyBackground,
+  );
+}
+
+Widget _buildSubgroupButton(BuildContext context, MainGroupData state, MainGroupCubit cubit) {
+  return PopupMenuButton<SubgroupFilter>(
+    onSelected: (filter) => cubit.changeSubgroupFilter(filter),
+    tooltip: 'Выбор подгруппы',
+    icon: Icon(
+      _getSubgroupIcon(state.subgroupFilter),
+      color: AppColors.blue,
+    ),
+    itemBuilder: (context) => [
+      PopupMenuItem(
+        value: SubgroupFilter.all,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.people,
+                  size: 20,
+                  color: state.subgroupFilter == SubgroupFilter.all 
+                      ? AppColors.blue 
+                      : Colors.grey,
+                ),
+                const SizedBox(width: 8),
+                const Text('Вся группа'),
+              ],
+            ),
+            if (state.subgroupFilter == SubgroupFilter.all)
+              const Icon(Icons.check, size: 20, color: AppColors.blue),
+          ],
         ),
       ),
-      actions: [
-        IconButton(
-          icon: Icon(
-            state.isFavorite ? Icons.star : Icons.star_border,
-            color: state.isFavorite ? Colors.amber : AppColors.blue,
-          ),
-          onPressed: () => cubit.toggleFavorite(),
+      PopupMenuItem(
+        value: SubgroupFilter.first,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: state.subgroupFilter == SubgroupFilter.first
+                        ? AppColors.blue
+                        : Colors.grey.shade300,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Text(
+                      '1',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text('1 подгруппа'),
+              ],
+            ),
+            if (state.subgroupFilter == SubgroupFilter.first)
+              const Icon(Icons.check, size: 20, color: AppColors.blue),
+          ],
         ),
-        const SizedBox(width: 30),
-        const Icon(Icons.group_work, color: AppColors.blue),
-        const SizedBox(width: 20),
-        _buildViewTypeMenu(context, state, cubit),
-      ],
-      backgroundColor: AppColors.greyBackground,
-    );
-  }
+      ),
+      PopupMenuItem(
+        value: SubgroupFilter.second,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: state.subgroupFilter == SubgroupFilter.second
+                        ? AppColors.blue
+                        : Colors.grey.shade300,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Text(
+                      '2',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text('2 подгруппа'),
+              ],
+            ),
+            if (state.subgroupFilter == SubgroupFilter.second)
+              const Icon(Icons.check, size: 20, color: AppColors.blue),
+          ],
+        ),
+      ),
+    ],
+  );
+}
 
-  Widget _buildViewTypeMenu(BuildContext context, MainGroupData state, MainGroupCubit cubit) {
+IconData _getSubgroupIcon(SubgroupFilter filter) {
+  switch (filter) {
+    case SubgroupFilter.all:
+      return Icons.people;
+    case SubgroupFilter.first:
+      return Icons.person;
+    case SubgroupFilter.second:
+      return Icons.person_2;
+  }
+}
+
+
+
+  Widget _buildViewTypeMenu(
+    BuildContext context,
+    MainGroupData state,
+    MainGroupCubit cubit,
+  ) {
     return PopupMenuButton<ScheduleViewType>(
       onSelected: (value) => cubit.changeViewType(value),
       itemBuilder: (context) => [
@@ -1259,10 +1396,7 @@ class _MainGroupScheduleWidgetState extends State<MainGroupScheduleWidget> {
                 scheduleData.endExamsDate != null
                     ? 'Окончание: ${scheduleData.endExamsDate}'
                     : 'Семестр: дата не указана',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],
           ),

@@ -54,7 +54,7 @@ class DisplaySchedule extends Equatable {
 
 class DaySectionData extends Equatable {
   final String dayName;
-  final String? dateDisplay;
+   String? dateDisplay;
   final List<DisplaySchedule> schedules;
   final int weekNumber;
   final bool isStartDay;
@@ -62,7 +62,7 @@ class DaySectionData extends Equatable {
   final bool showWeekNumberInCard;
   final int? forceWeekNumber;
 
-  const DaySectionData({
+   DaySectionData({
     required this.dayName,
      this.dateDisplay,
     required this.schedules,

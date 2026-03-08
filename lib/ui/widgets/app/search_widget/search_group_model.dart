@@ -93,17 +93,17 @@
 
 // class SearchGroupModel extends ChangeNotifier {
 //   final apiClient = ApiClient();
-  
+
 //   // Два отдельных списка
 //   var _allGroups = <Groups>[];
 //   var _favoriteGroups = <Groups>[];
 //   var _filteredFavoriteGroups = <Groups>[];
 //   var _filteredAllGroups = <Groups>[];
-  
+
 //   var isSearchingGroups = false;
 //   Timer? searchDebounce;
 //   String? _searchQuery;
-  
+
 //   // Получить объединенный список для отображения
 //   List<Groups> get groups {
 //     if (_searchQuery != null && _searchQuery!.isNotEmpty) {
@@ -126,18 +126,18 @@
 
 //   Future<void> getAllGroups() async {
 //     final groups = await apiClient.getGroups();
-    
+
 //     // Получаем ID избранных групп
 //     final favoriteIds = await FavoriteService.getAllFavorites();
-    
+
 //     // Разделяем группы на избранные и все остальные
 //     _favoriteGroups = groups.where((g) => favoriteIds.contains(g.name)).toList();
 //     _allGroups = groups.where((g) => !favoriteIds.contains(g.name)).toList();
-    
+
 //     // Сортируем каждый список
 //     _favoriteGroups.sort((a, b) => a.name.compareTo(b.name));
 //     _allGroups.sort((a, b) => a.name.compareTo(b.name));
-    
+
 //     notifyListeners();
 //   }
 
@@ -151,32 +151,32 @@
 //   void _performSearch(String text) {
 //     final searchQuery = text.trim();
 //     _searchQuery = searchQuery.isEmpty ? null : searchQuery;
-    
+
 //     if (searchQuery.isEmpty) {
 //       _filteredFavoriteGroups = [];
 //       _filteredAllGroups = [];
 //       isSearchingGroups = false;
 //     } else {
 //       isSearchingGroups = true;
-      
+
 //       // Фильтруем избранные группы
 //       _filteredFavoriteGroups = _favoriteGroups.where((group) {
 //         return group.name.toLowerCase().contains(searchQuery.toLowerCase());
 //       }).toList();
-      
+
 //       // Фильтруем все остальные группы
 //       _filteredAllGroups = _allGroups.where((group) {
 //         return group.name.toLowerCase().contains(searchQuery.toLowerCase());
 //       }).toList();
 //     }
-    
+
 //     notifyListeners();
 //   }
 
 //   // Добавить/удалить группу из избранного
 //   Future<void> toggleGroupFavorite(String groupId) async {
 //     await FavoriteService.toggleFavorite(groupId);
-    
+
 //     // Обновляем списки
 //     await _updateGroupsAfterFavoriteChange(groupId);
 //   }
@@ -185,7 +185,7 @@
 //   Future<void> _updateGroupsAfterFavoriteChange(String groupId) async {
 //     // Находим группу
 //     Groups? groupToMove;
-    
+
 //     // Ищем в избранных
 //     final favoriteIndex = _favoriteGroups.indexWhere((g) => g.name == groupId);
 //     if (favoriteIndex != -1) {
@@ -201,16 +201,16 @@
 //         _favoriteGroups.add(groupToMove);
 //       }
 //     }
-    
+
 //     // Сортируем списки
 //     _favoriteGroups.sort((a, b) => a.name.compareTo(b.name));
 //     _allGroups.sort((a, b) => a.name.compareTo(b.name));
-    
+
 //     // Применяем текущий поиск, если он есть
 //     if (_searchQuery != null && _searchQuery!.isNotEmpty) {
 //       _performSearch(_searchQuery!);
 //     }
-    
+
 //     notifyListeners();
 //   }
 
@@ -225,17 +225,6 @@
 //     super.dispose();
 //   }
 // }
-
-
-
-
-
-
-
-
-
-
-
 
 // import 'dart:async';
 // import 'package:bsuir/domain/entity/groups.dart';
@@ -252,7 +241,7 @@
 //   var isSearchingGroups = false;
 //   Timer? searchDebounce;
 //   String? _searchQuery;
-  
+
 //   List<Groups> get groups => _filteredGroups;
 //   List<Groups> get favoriteGroups => _favoriteGroups; // ДОБАВЛЕНО: геттер для избранных
 
@@ -268,22 +257,22 @@
 //     final groups = await apiClient.getGroups();
 //     _allGroups = groups;
 //     _filteredGroups = groups;
-    
+
 //     // ДОБАВЛЕНО: загружаем избранные группы
 //     await _loadFavoriteGroups();
-    
+
 //     notifyListeners();
 //   }
 
 //   // ДОБАВЛЕНО: загрузка избранных групп
 //   Future<void> _loadFavoriteGroups() async {
 //     final favoriteIds = await FavoriteService.getAllFavorites();
-    
+
 //     // Фильтруем избранные группы из общего списка
 //     _favoriteGroups = _allGroups.where((group) {
 //       return favoriteIds.contains(group.name);
 //     }).toList();
-    
+
 //     // Сортируем избранные группы по названию
 //     _favoriteGroups.sort((a, b) => a.name.compareTo(b.name));
 //   }
@@ -324,12 +313,6 @@
 //   }
 // }
 
-
-
-
-
-
-
 // import 'dart:async';
 // import 'package:bsuir/domain/entity/groups.dart';
 // import 'package:bsuir/ui/widgets/navigation/main_navigation.dart';
@@ -345,7 +328,7 @@
 //   var isSearchingGroups = false;
 //   Timer? searchDebounce;
 //   String? _searchQuery;
-  
+
 //   List<Groups> get groups => _filteredGroups;
 //   List<Groups> get favoriteGroups => _favoriteGroups;
 
@@ -355,7 +338,7 @@
 //       MainNavigationRouteNames.mainGroup,
 //       arguments: groupNumber,
 //     ).then((_) {
-     
+
 //       refreshFavorites();
 //     });
 //   }
@@ -364,25 +347,25 @@
 //     final groups = await apiClient.getGroups();
 //     _allGroups = groups;
 //     _filteredGroups = groups;
-    
+
 //     await _loadFavoriteGroups();
-    
+
 //     notifyListeners();
 //   }
 
 //   Future<void> _loadFavoriteGroups() async {
 //     final favoriteIds = await FavoriteService.getAllFavorites();
-    
+
 //     _favoriteGroups = _allGroups.where((group) {
 //       return favoriteIds.contains(group.name);
 //     }).toList();
-    
+
 //     _favoriteGroups.sort((a, b) => a.name.compareTo(b.name));
 //   }
 
 //   Future<void> refreshFavorites() async {
 //     await _loadFavoriteGroups();
-//     notifyListeners(); 
+//     notifyListeners();
 //   }
 
 //   Future<void> searchGroup(String text) async {
@@ -415,31 +398,12 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'dart:async';
 import 'package:bsuir/domain/entity/groups.dart';
 import 'package:bsuir/ui/widgets/navigation/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:bsuir/domain/api_client/api_client.dart';
-import 'package:bsuir/services/favorite_service.dart';
+import 'package:bsuir/services/favorite_group_service.dart';
 
 class SearchGroupModel extends ChangeNotifier {
   final apiClient = ApiClient();
@@ -449,29 +413,28 @@ class SearchGroupModel extends ChangeNotifier {
   var isSearchingGroups = false;
   Timer? searchDebounce;
   String? _searchQuery;
-  
+
   List<Groups> get groups => _filteredGroups;
   List<Groups> get favoriteGroups => _favoriteGroups;
 
   void onGroupTap(BuildContext context, String groupName) {
     final groupNumber = int.parse(groupName);
-    Navigator.of(context).pushNamed(
-      MainNavigationRouteNames.mainGroup,
-      arguments: groupNumber,
-    ).then((_) {
-      // Когда возвращаемся с экрана расписания, обновляем избранное
-      refreshFavorites();
-    });
+    Navigator.of(context)
+        .pushNamed(MainNavigationRouteNames.mainGroup, arguments: groupNumber)
+        .then((_) {
+          // Когда возвращаемся с экрана расписания, обновляем избранное
+          refreshFavorites();
+        });
   }
 
   Future<void> getAllGroups() async {
     final groups = await apiClient.getGroups();
     _allGroups = groups;
     _filteredGroups = groups;
-    
+
     // Загружаем избранные группы с сохранением порядка
     await _loadFavoriteGroups();
-    
+
     notifyListeners();
   }
 
@@ -480,7 +443,7 @@ class SearchGroupModel extends ChangeNotifier {
     try {
       // Получаем ID избранных в порядке добавления (последний - первый)
       final favoriteIds = await FavoriteService.getAllFavorites();
-      
+
       // Находим группы по ID
       final favoriteGroupsMap = <String, Groups>{};
       for (final group in _allGroups) {
@@ -488,7 +451,7 @@ class SearchGroupModel extends ChangeNotifier {
           favoriteGroupsMap[group.name] = group;
         }
       }
-      
+
       // Восстанавливаем порядок избранных
       _favoriteGroups = [];
       for (final id in favoriteIds) {

@@ -120,21 +120,21 @@ class ScheduleUtils {
     Map<String, List<Schedule>>? schedules,
     String dayName,
     int weekNumber,
-    String? date,
+    String date,
   ) {
     // try {
     //   final targetDate = DateUtils.parseDate(date);
     //   // Проверка shouldShowScheduleForDate будет добавлена позже, если нужна
     // } catch (e) {}
-final targetDate = date ?? DateUtils.getCurrentDateFormatted();
+
     final regularSchedules = getScheduleForDayAndWeek(
       schedules,
       dayName,
       weekNumber,
-      targetDate,
+      date,
     );
     
-    final announcements = getAnnouncementsForDate(targetDate, schedules);
+    final announcements = getAnnouncementsForDate(date, schedules);
 
     final filteredRegularSchedules = regularSchedules.where((schedule) {
       final lessonType = schedule.lessonTypeAbbrev?.toLowerCase() ?? '';
