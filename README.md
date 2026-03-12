@@ -1,4 +1,4 @@
-# bsuir
+# Schedule
 
 A new Flutter project.
 
