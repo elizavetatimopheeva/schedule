@@ -1,22 +1,19 @@
-import 'dart:math';
-
-import 'package:bsuir/domain/entity/schedule.dart';
+import 'package:bsuir/logic/bloc/main_group/main_group_cubit.dart';
+import 'package:bsuir/logic/models/schedule_models.dart';
+import 'package:bsuir/logic/utils/schedule_utils.dart';
 import 'package:bsuir/resourses/app_colors.dart';
-import 'package:bsuir/ui/widgets/app/main_group/main_group_model.dart';
 import 'package:flutter/material.dart';
 
-Widget LessonInfo(MainGroupModel model, Schedule schedule) {
-  // final isAnnouncement = model.isAnnouncement(schedule);
-  //final isZaochGroup = model.isZaochOrDist;
-  final teacherImage = model.getTeacherImage(schedule.employees);
-  final employeeName = model.getEmployeeNameFromList(schedule.employees);
-  // final subjectName = model.getSubjectName(schedule);
-  // final lessonType = model.getLessonType(schedule);
+Widget lessonInfo(
+  MainGroupCubit cubit,
+  DisplaySchedule schedule,
+) {
+  final employee = ScheduleUtils.getEmployeeName(schedule.original.employees);
   String subgroup() {
-    if (schedule.numSubgroup == 0) {
+    if (schedule.original.numSubgroup == 0) {
       return '--';
     } else {
-      return schedule.numSubgroup.toString();
+      return schedule.original.numSubgroup.toString();
     }
   }
 
@@ -43,13 +40,6 @@ Widget LessonInfo(MainGroupModel model, Schedule schedule) {
             ),
           ),
           SizedBox(height: 5),
-
-          // Text(
-          //   schedule.subject ?? 'Название отсутствует',
-          //   textAlign: TextAlign.justify,
-          //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          // ),
-          // SizedBox(height: 20),
           Text(
             'Преподаватель',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -67,21 +57,21 @@ Widget LessonInfo(MainGroupModel model, Schedule schedule) {
                   border: Border.all(color: Colors.grey[300]!, width: 1),
                 ),
                 child: ClipOval(
-                  child: teacherImage.isNotEmpty
+                  child: schedule.teacherImage.isNotEmpty
                       ? Image.network(
-                          teacherImage,
+                          schedule.teacherImage,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return Icon(
+                            return const Icon(
                               Icons.person_outline,
-                              color: Colors.grey[400],
+                              color: Colors.grey,
                               size: 20,
                             );
                           },
                         )
-                      : Icon(
+                      : const Icon(
                           Icons.person_outline,
-                          color: Colors.grey[400],
+                          color: Colors.grey,
                           size: 20,
                         ),
                 ),
@@ -93,11 +83,10 @@ Widget LessonInfo(MainGroupModel model, Schedule schedule) {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    employeeName.isEmpty
+                    employee.isEmpty
                         ? SizedBox.shrink()
-                        : 
-                        Text(
-                         employeeName,
+                        : Text(
+                            employee,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -105,8 +94,8 @@ Widget LessonInfo(MainGroupModel model, Schedule schedule) {
                             ),
                           ),
                     SizedBox(height: 2),
-                    schedule.auditories == null &&
-                            schedule.auditories!.isNotEmpty
+                    (schedule.original.auditories == null ||
+                            schedule.original.auditories!.isEmpty)
                         ? SizedBox.shrink()
                         : Row(
                             children: [
@@ -117,7 +106,7 @@ Widget LessonInfo(MainGroupModel model, Schedule schedule) {
                               ),
                               SizedBox(width: 4),
                               Text(
-                                schedule.auditories!.join(', '),
+                                schedule.original.auditories!.join(', '),
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.grey[600],
@@ -130,15 +119,7 @@ Widget LessonInfo(MainGroupModel model, Schedule schedule) {
               ),
             ],
           ),
-
-          // SizedBox(height: 30),
-
-          // Text(
-          //   'Детали',
-          //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          // ),
           SizedBox(height: 12),
-
           Container(
             decoration: BoxDecoration(
               color: Colors.grey[100],
@@ -152,7 +133,8 @@ Widget LessonInfo(MainGroupModel model, Schedule schedule) {
                     children: [
                       Expanded(
                         child: Text(
-                          schedule.subjectFullName ?? 'Название отсутствует',
+                          schedule.original.subjectFullName ??
+                              'Название отсутствует',
                           style: TextStyle(fontWeight: FontWeight.w600),
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
@@ -161,30 +143,32 @@ Widget LessonInfo(MainGroupModel model, Schedule schedule) {
                     ],
                   ),
                 ),
-
-                // Divider(height: 1),
                 _buildDetailRow(
                   'Время',
-                  '${schedule.startLessonTime}-${schedule.endLessonTime}',
+                  '${schedule.original.startLessonTime}-${schedule.original.endLessonTime}',
                 ),
                 _buildDetailRow(
                   'Аудитория',
-                  schedule.auditories != null && schedule.auditories!.isNotEmpty
-                      ? schedule.auditories!.join(', ')
+                  schedule.original.auditories != null &&
+                          schedule.original.auditories!.isNotEmpty
+                      ? schedule.original.auditories!.join(', ')
                       : '--',
                 ),
-                _buildDetailRow('Тип занятия', '${schedule.lessonTypeAbbrev}'),
+                _buildDetailRow(
+                  'Тип занятия',
+                  '${schedule.original.lessonTypeAbbrev}',
+                ),
                 _buildDetailRow('Подгруппа', subgroup()),
                 _buildDetailRow(
                   'Неделя',
-                  schedule.weekNumber != null && schedule.weekNumber!.isNotEmpty
-                      ? schedule.weekNumber!.join(', ')
+                  schedule.original.weekNumber != null &&
+                          schedule.original.weekNumber!.isNotEmpty
+                      ? schedule.original.weekNumber!.join(', ')
                       : '--',
                 ),
               ],
             ),
           ),
-
           SizedBox(height: 5),
         ],
       ),

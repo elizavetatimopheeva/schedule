@@ -26,8 +26,14 @@ class LessonTypeInfo extends Equatable {
 
   @override
   List<Object?> get props => [
-    isExam, isConsult, isLecture, isPractice, isLab, 
-    isAnnouncement, type, displayName
+    isExam,
+    isConsult,
+    isLecture,
+    isPractice,
+    isLab,
+    isAnnouncement,
+    type,
+    displayName,
   ];
 }
 
@@ -37,6 +43,8 @@ class DisplaySchedule extends Equatable {
   final LessonTypeInfo lessonTypeInfo;
   final String teacherImage;
   final String? weekNumberDisplay;
+  final String? subgroupDisplay;
+  final int subgroupNumber;
 
   const DisplaySchedule({
     required this.original,
@@ -44,38 +52,49 @@ class DisplaySchedule extends Equatable {
     required this.lessonTypeInfo,
     required this.teacherImage,
     this.weekNumberDisplay,
+    this.subgroupDisplay,
+    this.subgroupNumber = 0,
   });
 
   @override
   List<Object?> get props => [
-    original, subjectName, lessonTypeInfo, teacherImage, weekNumberDisplay
+    original,
+    subjectName,
+    lessonTypeInfo,
+    teacherImage,
+    weekNumberDisplay,
+    subgroupDisplay,
+    subgroupNumber,
   ];
 }
 
 class DaySectionData extends Equatable {
   final String dayName;
-  final String dateDisplay;
+  final String? dateDisplay;
   final List<DisplaySchedule> schedules;
   final int weekNumber;
   final bool isStartDay;
   final bool isSemesterEnded;
   final bool showWeekNumberInCard;
-  final int? forceWeekNumber;
 
   const DaySectionData({
     required this.dayName,
-    required this.dateDisplay,
+    this.dateDisplay,
     required this.schedules,
     required this.weekNumber,
     required this.isStartDay,
     required this.isSemesterEnded,
     this.showWeekNumberInCard = false,
-    this.forceWeekNumber,
   });
 
   @override
   List<Object?> get props => [
-    dayName, dateDisplay, schedules, weekNumber, isStartDay, 
-    isSemesterEnded, showWeekNumberInCard, forceWeekNumber
+    dayName,
+    dateDisplay,
+    schedules,
+    weekNumber,
+    isStartDay,
+    isSemesterEnded,
+    showWeekNumberInCard,
   ];
 }

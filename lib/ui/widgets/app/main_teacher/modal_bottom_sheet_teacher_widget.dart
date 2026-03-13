@@ -1,17 +1,8 @@
-import 'dart:math';
-
 import 'package:bsuir/domain/entity/schedule.dart';
-import 'package:bsuir/ui/widgets/app/main_group/main_group_model.dart';
 import 'package:bsuir/ui/widgets/app/main_teacher/main_teacher_model.dart';
 import 'package:flutter/material.dart';
 
 Widget LessonTeacherInfo(MainTeacherModel model, Schedule schedule) {
-  final isAnnouncement = model.isAnnouncement(schedule);
-  //final isZaochGroup = model.isZaochOrDist;
-  //final teacherImage = model.getTeacherImage(schedule.employees);
-  final employeeName = model.getEmployeeNameFromList(schedule.employees);
-  final subjectName = model.getSubjectName(schedule);
-  // final lessonType = model.getLessonType(schedule);
   final groupsText = model.getGroupsForSchedule(schedule);
   String subgroup() {
     if (schedule.numSubgroup == 0) {
@@ -61,55 +52,6 @@ Widget LessonTeacherInfo(MainTeacherModel model, Schedule schedule) {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(groupsText),
-              
-              // Container(
-              //   width: 45,
-              //   height: 45,
-              //   decoration: BoxDecoration(
-              //     shape: BoxShape.circle,
-              //     border: Border.all(color: Colors.grey[300]!, width: 1),
-              //   ),
-              //   child: ClipOval(
-              //     child: teacherImage.isNotEmpty
-              //         ? Image.network(
-              //             teacherImage,
-              //             fit: BoxFit.cover,
-              //             errorBuilder: (context, error, stackTrace) {
-              //               return Icon(
-              //                 Icons.person_outline,
-              //                 color: Colors.grey[400],
-              //                 size: 20,
-              //               );
-              //             },
-              //           )
-              //         : Icon(
-              //             Icons.person_outline,
-              //             color: Colors.grey[400],
-              //             size: 20,
-              //           ),
-              //   ),
-              // ),
-
-              // SizedBox(width: 12),
-
-              // Expanded(
-              //   child: Column(
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     children: [
-              //       employeeName.isEmpty
-              //           ? SizedBox.shrink()
-              //           : Text(
-              //               employeeName,
-              //               style: TextStyle(
-              //                 fontSize: 16,
-              //                 fontWeight: FontWeight.w600,
-              //                 color: Colors.black87,
-              //               ),
-              //             ),
-                    
-              //     ],
-              //   ),
-              // ),
             ],
           ),
 
@@ -144,7 +86,6 @@ Widget LessonTeacherInfo(MainTeacherModel model, Schedule schedule) {
                   ),
                 ),
 
-                // Divider(height: 1),
                 _buildDetailRow(
                   'Время',
                   '${schedule.startLessonTime}-${schedule.endLessonTime}',

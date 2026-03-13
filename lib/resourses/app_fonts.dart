@@ -3,9 +3,7 @@ class AppFonts {
 
   static const basisGrotesquePro = 'BasisGrotesquePro';
   static const steinbeck = 'Steinbeck';
-  // static const montserrat = 'SanFrancisco';
-
-  static const montserrat = 'Montserrat'; //san_francisco
+  static const montserrat = 'Montserrat'; 
   // static const sanFrancisco = 'SanFrancisco';
   // static const comforterBrush = 'ComforterBrush';
 }
