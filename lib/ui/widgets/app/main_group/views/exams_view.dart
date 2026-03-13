@@ -2,13 +2,14 @@ import 'package:bsuir/domain/entity/main_group.dart';
 import 'package:bsuir/domain/entity/schedule.dart';
 import 'package:bsuir/logic/bloc/main_group/main_group_cubit.dart';
 import 'package:bsuir/logic/bloc/main_group/main_group_state.dart';
-
 import 'package:bsuir/logic/models/schedule_models.dart';
 import 'package:bsuir/logic/utils/date_utils.dart';
+import 'package:bsuir/logic/utils/lesson_type_utils.dart';
 import 'package:bsuir/logic/utils/schedule_utils.dart';
+import 'package:bsuir/services/subgroup_service.dart';
 import 'package:bsuir/ui/widgets/app/main_group/components/day_section.dart';
 import 'package:bsuir/ui/widgets/app/main_group/components/empty_state_widgets.dart';
-import 'package:flutter/material.dart' hide DateUtils;
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ExamsView extends StatelessWidget {
@@ -43,20 +44,29 @@ class ExamsView extends StatelessWidget {
   }
 
   List<Widget> _buildSections(MainGroup scheduleData) {
-    final Map<String, List<Schedule>> examsByDate = {};
+    final Map<String, List<DisplaySchedule>> examsByDate = {};
 
-    // Группировка экзаменов по датам
     for (final exam in scheduleData.exams!) {
+      if (!_shouldShowExam(exam)) continue;
+
       final date = exam.dateLesson ?? '';
-      if (date.isNotEmpty) {
-        if (!examsByDate.containsKey(date)) {
-          examsByDate[date] = [];
-        }
-        examsByDate[date]!.add(exam);
+      if (date.isEmpty) continue;
+
+      if (!examsByDate.containsKey(date)) {
+        examsByDate[date] = [];
       }
+
+      final displaySchedule = DisplaySchedule(
+        original: exam,
+        subjectName: ScheduleUtils.getSubjectName(exam),
+        lessonTypeInfo: LessonTypeUtils.getLessonTypeInfo(exam),
+        teacherImage: ScheduleUtils.getTeacherImage(exam.employees),
+        weekNumberDisplay: null,
+      );
+
+      examsByDate[date]!.add(displaySchedule);
     }
 
-    // Сортировка дат
     final sortedDates = examsByDate.keys.toList()
       ..sort((a, b) {
         try {
@@ -68,20 +78,21 @@ class ExamsView extends StatelessWidget {
         }
       });
 
-    // Создание секций
     return sortedDates.map((date) {
       final examsForDate = examsByDate[date]!;
-      final dayName = DateUtils.getDayNameFromDate(date);
-      
-      final displaySchedules = ScheduleUtils.convertToDisplaySchedules(
-        examsForDate, null
-      );
+      final dayName = MyDateUtils.getDayNameFromDate(date);
+
+      examsForDate.sort((a, b) {
+        final timeA = a.original.startLessonTime ?? '';
+        final timeB = b.original.startLessonTime ?? '';
+        return timeA.compareTo(timeB);
+      });
 
       return DaySection(
         data: DaySectionData(
           dayName: dayName,
           dateDisplay: date,
-          schedules: displaySchedules,
+          schedules: examsForDate,
           weekNumber: 1,
           isStartDay: false,
           isSemesterEnded: false,
@@ -92,4 +103,12 @@ class ExamsView extends StatelessWidget {
       );
     }).toList();
   }
+
+  bool _shouldShowExam(Schedule exam) {
+    if (state.subgroupFilter == SubgroupType.all) return true;
+    final subgroupNumber = state.subgroupFilter.subgroupNumber;
+    if (exam.numSubgroup == null || exam.numSubgroup == 0) return true;
+    return exam.numSubgroup == subgroupNumber;
+  }
+
 }

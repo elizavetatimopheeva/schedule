@@ -22,7 +22,9 @@ class ScheduleUtils {
     return employees?.firstOrNull?.photoLink ?? '';
   }
 
-  static String getEmployeeName(Employee? employee) {
+  static String getEmployeeName(List<Employee>? employees) {
+    final employee = employees?.firstOrNull;
+
     if (employee == null) return '';
 
     final firstName = employee.firstName;
@@ -40,29 +42,33 @@ class ScheduleUtils {
       if (schedule.announcement == true) {
         return schedule.startLessonDate == targetDate;
       }
-      
+
       final startDate = schedule.startLessonDate;
       final endDate = schedule.endLessonDate;
-      
-      if (startDate != null && startDate.isNotEmpty && 
-          endDate != null && endDate.isNotEmpty) {
+
+      if (startDate != null &&
+          startDate.isNotEmpty &&
+          endDate != null &&
+          endDate.isNotEmpty) {
         try {
-          final scheduleStartDate = DateUtils.parseDate(startDate);
-          final scheduleEndDate = DateUtils.parseDate(endDate);
-          final currentDate = DateUtils.parseDate(targetDate);
-          
-          return (currentDate.isAfter(scheduleStartDate) || 
+          final scheduleStartDate = MyDateUtils.parseDate(startDate);
+          final scheduleEndDate = MyDateUtils.parseDate(endDate);
+          final currentDate = MyDateUtils.parseDate(targetDate);
+
+          return (currentDate.isAfter(scheduleStartDate) ||
                   currentDate.isAtSameMomentAs(scheduleStartDate)) &&
-                 (currentDate.isBefore(scheduleEndDate) || 
+              (currentDate.isBefore(scheduleEndDate) ||
                   currentDate.isAtSameMomentAs(scheduleEndDate));
         } catch (e) {
           return true;
         }
       }
-      
+
       return true;
     }).toList();
   }
+
+
 
   static List<Schedule> getScheduleForDayAndWeek(
     Map<String, List<Schedule>>? schedules,
@@ -86,6 +92,8 @@ class ScheduleUtils {
 
     return filterSchedulesByDate(filteredByWeekNumber, targetDate);
   }
+
+
 
   static List<Schedule> getAnnouncementsForDate(
     String date,
@@ -115,17 +123,12 @@ class ScheduleUtils {
     return allAnnouncements;
   }
 
-  // НОВЫЙ МЕТОД: getAllSchedulesForDay
   static List<Schedule> getAllSchedulesForDay(
     Map<String, List<Schedule>>? schedules,
     String dayName,
     int weekNumber,
     String date,
   ) {
-    // try {
-    //   final targetDate = DateUtils.parseDate(date);
-    //   // Проверка shouldShowScheduleForDate будет добавлена позже, если нужна
-    // } catch (e) {}
 
     final regularSchedules = getScheduleForDayAndWeek(
       schedules,
@@ -133,15 +136,15 @@ class ScheduleUtils {
       weekNumber,
       date,
     );
-    
+
     final announcements = getAnnouncementsForDate(date, schedules);
 
     final filteredRegularSchedules = regularSchedules.where((schedule) {
       final lessonType = schedule.lessonTypeAbbrev?.toLowerCase() ?? '';
-      final isExam = schedule.lessonTypeAbbrev == 'экз' || 
-                    lessonType.contains('экз');
-      final isConsult = schedule.lessonTypeAbbrev == 'конс' || 
-                       lessonType.contains('конс');
+      final isExam =
+          schedule.lessonTypeAbbrev == 'экз' || lessonType.contains('экз');
+      final isConsult =
+          schedule.lessonTypeAbbrev == 'конс' || lessonType.contains('конс');
       return !isExam && !isConsult;
     }).toList();
 
@@ -154,69 +157,6 @@ class ScheduleUtils {
 
     return allSchedules;
   }
-
-  // НОВЫЙ МЕТОД: getExamsForDate
-  // static List<Schedule> getExamsForDate(String date, List<Schedule>? exams) {
-  //   if (exams == null) return [];
-
-  //   // try {
-  //   //   final targetDate = DateUtils.parseDate(date);
-  //   //   // Проверка валидности даты может быть добавлена позже
-  //   // } catch (e) {}
-
-  //   return exams.where((exam) {
-  //     final examDate = exam.dateLesson;
-  //     if (examDate == date) return true;
-      
-  //     final startDate = exam.startLessonDate;
-  //     final endDate = exam.endLessonDate;
-      
-  //     if (startDate != null && startDate.isNotEmpty && 
-  //         endDate != null && endDate.isNotEmpty) {
-  //       try {
-  //         final scheduleStartDate = DateUtils.parseDate(startDate);
-  //         final scheduleEndDate = DateUtils.parseDate(endDate);
-  //         final currentDate = DateUtils.parseDate(date);
-          
-  //         return (currentDate.isAfter(scheduleStartDate) || 
-  //                 currentDate.isAtSameMomentAs(scheduleStartDate)) &&
-  //                (currentDate.isBefore(scheduleEndDate) || 
-  //                 currentDate.isAtSameMomentAs(scheduleEndDate));
-  //       } catch (e) {
-  //         return false;
-  //       }
-  //     }
-      
-  //     return false;
-  //   }).toList();
-  // }
-
-  // НОВЫЙ МЕТОД: shouldShowScheduleForDate
-  // static bool shouldShowScheduleForDate(
-  //   DateTime date,
-  //   String? startDateStr,
-  //   String? endDateStr,
-  // ) {
-  //   if (startDateStr != null && startDateStr.isNotEmpty) {
-  //     try {
-  //       final startDate = DateUtils.parseDate(startDateStr);
-  //       if (date.isBefore(startDate)) {
-  //         return false;
-  //       }
-  //     } catch (e) {}
-  //   }
-    
-  //   if (endDateStr != null && endDateStr.isNotEmpty) {
-  //     try {
-  //       final endDate = DateUtils.parseDate(endDateStr);
-  //       if (date.isAfter(endDate)) {
-  //         return false;
-  //       }
-  //     } catch (e) {}
-  //   }
-    
-  //   return true;
-  // }
 
   static List<DisplaySchedule> convertToDisplaySchedules(
     List<Schedule> schedules,
@@ -232,31 +172,4 @@ class ScheduleUtils {
       );
     }).toList();
   }
-
-  // static bool isScheduleActiveOnDate(Schedule schedule, String targetDate) {
-  //   if (schedule.announcement == true) {
-  //     return schedule.startLessonDate == targetDate;
-  //   }
-    
-  //   final startDate = schedule.startLessonDate;
-  //   final endDate = schedule.endLessonDate;
-    
-  //   if (startDate != null && startDate.isNotEmpty && 
-  //       endDate != null && endDate.isNotEmpty) {
-  //     try {
-  //       final scheduleStartDate = DateUtils.parseDate(startDate);
-  //       final scheduleEndDate = DateUtils.parseDate(endDate);
-  //       final currentDate = DateUtils.parseDate(targetDate);
-        
-  //       return (currentDate.isAfter(scheduleStartDate) || 
-  //               currentDate.isAtSameMomentAs(scheduleStartDate)) &&
-  //              (currentDate.isBefore(scheduleEndDate) || 
-  //               currentDate.isAtSameMomentAs(scheduleEndDate));
-  //     } catch (e) {
-  //       return true;
-  //     }
-  //   }
-    
-  //   return true;
-  // }
 }

@@ -47,7 +47,6 @@ class DailyView extends StatelessWidget {
 
     final sections = <Widget>[];
 
-    // Для каждого дня недели собираем все занятия
     for (final dayName in allDays) {
       final groupedSchedules = _getGroupedSchedulesForDay(
         scheduleData,
@@ -55,7 +54,14 @@ class DailyView extends StatelessWidget {
       );
 
       if (groupedSchedules.isNotEmpty) {
-        sections.add(_createDaySection(dayName, groupedSchedules));
+        final filteredSchedules = cubit.filterDisplaySchedulesBySubgroup(
+          groupedSchedules,
+          state.subgroupFilter,
+        );
+
+        if (filteredSchedules.isNotEmpty) {
+          sections.add(_createDaySection(dayName, filteredSchedules));
+        }
       }
     }
 
@@ -67,50 +73,26 @@ class DailyView extends StatelessWidget {
     String dayName,
   ) {
     if (scheduleData.schedules == null) return [];
-
-    // Получаем все занятия для этого дня
     final daySchedules = scheduleData.schedules![dayName] ?? [];
-
-    // Группируем занятия по ключу (предмет + время + аудитория + тип + преподаватель)
     final Map<String, GroupedScheduleData> groupedMap = {};
 
     for (final schedule in daySchedules) {
-      // Создаем ключ для группировки
       final key = _createGroupKey(schedule);
 
       if (!groupedMap.containsKey(key)) {
         groupedMap[key] = GroupedScheduleData(
           schedule: schedule,
           weekNumbers: [],
-          isAnnouncement: false,
+          subgroupNumber: schedule.numSubgroup ?? 0,
         );
       }
 
-      // Добавляем номера недель
       if (schedule.weekNumber != null) {
         groupedMap[key]!.weekNumbers.addAll(schedule.weekNumber!);
       }
     }
 
-    // Преобразуем в DisplaySchedule с объединенными номерами недель
-    return groupedMap.values.map((groupedData) {
-      final weekNumbers = groupedData.weekNumbers.toSet().toList()..sort();
-      final weekNumbersStr = weekNumbers.join(', ');
-
-      return DisplaySchedule(
-        original: groupedData.schedule,
-        subjectName: ScheduleUtils.getSubjectName(groupedData.schedule),
-        lessonTypeInfo: LessonTypeUtils.getLessonTypeInfo(groupedData.schedule),
-        teacherImage: ScheduleUtils.getTeacherImage(
-          groupedData.schedule.employees,
-        ),
-        weekNumberDisplay: groupedData.isAnnouncement ? null : weekNumbersStr,
-      );
-    }).toList()..sort((a, b) {
-      final timeA = a.original.startLessonTime ?? '';
-      final timeB = b.original.startLessonTime ?? '';
-      return timeA.compareTo(timeB);
-    });
+    return _convertToDisplaySchedules(groupedMap);
   }
 
   String _createGroupKey(Schedule schedule) {
@@ -118,19 +100,64 @@ class DailyView extends StatelessWidget {
     final time = schedule.startLessonTime ?? '';
     final auditories = schedule.auditories?.join(',') ?? '';
     final lessonType = schedule.lessonTypeAbbrev ?? '';
-    // Добавляем преподавателя в ключ, чтобы разные преподаватели не группировались вместе
     final teacher = schedule.employees?.firstOrNull?.lastName ?? '';
+    final subgroup = schedule.numSubgroup ?? 0;
 
-    return '$subject|$time|$auditories|$lessonType|$teacher';
+    return '$subject|$time|$auditories|$lessonType|$teacher|$subgroup';
+  }
+
+  List<DisplaySchedule> _convertToDisplaySchedules(
+    Map<String, GroupedScheduleData> groupedMap,
+  ) {
+    final result = <DisplaySchedule>[];
+
+    for (final groupedData in groupedMap.values) {
+      final weekNumbers = groupedData.weekNumbers.toSet().toList()..sort();
+      final weekNumbersStr = weekNumbers.join(', ');
+
+      final subgroupInfo = _formatSubgroupInfo(groupedData.subgroupNumber);
+
+      final displaySchedule = DisplaySchedule(
+        original: groupedData.schedule,
+        subjectName: ScheduleUtils.getSubjectName(groupedData.schedule),
+        lessonTypeInfo: LessonTypeUtils.getLessonTypeInfo(groupedData.schedule),
+        teacherImage: ScheduleUtils.getTeacherImage(
+          groupedData.schedule.employees,
+        ),
+        weekNumberDisplay: weekNumbersStr,
+        subgroupDisplay: subgroupInfo,
+        subgroupNumber: groupedData.subgroupNumber,
+      );
+
+      result.add(displaySchedule);
+    }
+
+    result.sort((a, b) {
+      final timeA = a.original.startLessonTime ?? '';
+      final timeB = b.original.startLessonTime ?? '';
+      return timeA.compareTo(timeB);
+    });
+
+    return result;
+  }
+
+  String _formatSubgroupInfo(int subgroupNumber) {
+    if (subgroupNumber == 0) return '';
+
+    switch (subgroupNumber) {
+      case 1:
+        return '1 подгруппа';
+      case 2:
+        return '2 подгруппа';
+      default:
+        return '$subgroupNumber подгруппа';
+    }
   }
 
   Widget _createDaySection(String dayName, List<DisplaySchedule> schedules) {
-    // final dateDisplay = '';
-
     return DaySection(
       data: DaySectionData(
         dayName: dayName,
-        // dateDisplay: dateDisplay,
         schedules: schedules,
         weekNumber: 0,
         isStartDay: false,
@@ -144,15 +171,16 @@ class DailyView extends StatelessWidget {
   }
 }
 
-// Вспомогательный класс для группировки
 class GroupedScheduleData {
   final Schedule schedule;
   final List<int> weekNumbers;
+  final int subgroupNumber;
   final bool isAnnouncement;
 
   GroupedScheduleData({
     required this.schedule,
     required this.weekNumbers,
-    required this.isAnnouncement,
+    required this.subgroupNumber,
+    this.isAnnouncement = false,
   });
 }

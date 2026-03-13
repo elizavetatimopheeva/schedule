@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
-class FavoriteService {
+class FavoriteGroupService {
   static const String _favoritesBox = 'favorites_box';
   static const String _orderKey = 'favorite_order';
   static Box<String>? _favoritesBoxInstance;
@@ -11,7 +11,6 @@ class FavoriteService {
     final appDocumentDir = await getApplicationDocumentsDirectory();
     Hive.init(appDocumentDir.path);
   }
-
 
   static Future<void> _ensureInitialized() async {
     if (!_isInitialized) {
@@ -26,13 +25,11 @@ class FavoriteService {
     return order != null ? order.split(',') : [];
   }
 
- 
   static Future<void> _saveFavoriteOrder(List<String> order) async {
     await _ensureInitialized();
     await _favoritesBoxInstance!.put(_orderKey, order.join(','));
   }
 
- 
   static Future<void> addToFavorites(String groupId) async {
     await _ensureInitialized();
     final order = await _getFavoriteOrder();
@@ -50,25 +47,41 @@ class FavoriteService {
     await _favoritesBoxInstance!.delete(groupId);
   }
 
-  static Future<bool> isFavorite(String groupId) async {
+  static Future<bool> isFavoriteGroup(String groupId) async {
     await _ensureInitialized();
     return _favoritesBoxInstance!.containsKey(groupId);
   }
 
   static Future<List<String>> getAllFavorites() async {
     await _ensureInitialized();
-        final order = await _getFavoriteOrder();
-        final validOrder = order.where((id) => _favoritesBoxInstance!.containsKey(id)).toList();
-        if (validOrder.length != order.length) {
+    final order = await _getFavoriteOrder();
+    final validOrder = order
+        .where((id) => _favoritesBoxInstance!.containsKey(id))
+        .toList();
+    if (validOrder.length != order.length) {
       await _saveFavoriteOrder(validOrder);
     }
-    
+
     return validOrder;
+  }
+
+  static Future<String?> initialFavoriteGroup() async {
+    try {
+      await _ensureInitialized();
+      final favoriteIds = await getAllFavorites();
+      if (favoriteIds.isNotEmpty) {
+        return favoriteIds.first;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
   }
 
   static Future<void> toggleFavorite(String groupId) async {
     await _ensureInitialized();
-    if (await isFavorite(groupId)) {
+    if (await isFavoriteGroup(groupId)) {
       await removeFromFavorites(groupId);
     } else {
       await addToFavorites(groupId);

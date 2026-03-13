@@ -6,9 +6,9 @@ import 'package:bsuir/services/favorite_group_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FavoriteService.initHive();
+  await FavoriteGroupService.initHive();
   await FavoriteTeacherService.initHive();
-  await SubgroupService.initHive(); 
+  await SubgroupService.initHive();
 
   runApp(const MyApp());
 }

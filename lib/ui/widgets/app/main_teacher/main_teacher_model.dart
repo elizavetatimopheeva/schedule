@@ -43,8 +43,6 @@ class MainTeacherModel extends ChangeNotifier {
     return await FavoriteTeacherService.isFavorite(teacherId);
   }
 
-  // ========== ОСНОВНЫЕ МЕТОДЫ ДЛЯ ВЫЧИСЛЕНИЯ НЕДЕЛЬ ==========
-
   DateTime _getMonday(DateTime date) {
     return date.subtract(Duration(days: date.weekday - 1));
   }
@@ -91,7 +89,6 @@ class MainTeacherModel extends ChangeNotifier {
     return _getMondayForWeek(weekOffset);
   }
 
-  // ========== МЕТОДЫ ДЛЯ ПОЛУЧЕНИЯ ДАТ ==========
 
   String getDateForCurrentWeekDay(String dayName, String? endDate) {
     return _getDateForWeekDay(0, dayName, endDate);
@@ -121,7 +118,6 @@ class MainTeacherModel extends ChangeNotifier {
     return dateString;
   }
 
-  // ========== ОСНОВНОЙ ИЗМЕНЕННЫЙ МЕТОД ДЛЯ ФИЛЬТРАЦИИ РАСПИСАНИЯ ==========
 
   List<Schedule> getFilteredSchedulesForDay(
     List<Schedule> daySchedules,
@@ -155,7 +151,6 @@ class MainTeacherModel extends ChangeNotifier {
     }).toList();
   }
 
-  // ========== МЕТОДЫ ДЛЯ ПРОВЕРКИ ВАЛИДНОСТИ ==========
 
   bool isDayValidForCurrentWeek(String dayName, String? endDate) {
     return _isDayValidForWeek(0, dayName, endDate);
@@ -207,7 +202,6 @@ class MainTeacherModel extends ChangeNotifier {
     return true;
   }
 
-  // ========== МЕТОДЫ ДЛЯ ПОЛУЧЕНИЯ НОМЕРОВ НЕДЕЛЬ ==========
 
   int getWeekNumberForCurrentWeek(String? startDate) {
     if (_currentAcademicWeek == null) return 1;
@@ -228,7 +222,6 @@ class MainTeacherModel extends ChangeNotifier {
     return _currentAcademicWeek! + weekOffset;
   }
 
-  // ========== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==========
 
   DateTime parseDate(String dateStr) {
     return DateFormat('dd.MM.yyyy').parse(dateStr);
@@ -292,7 +285,6 @@ class MainTeacherModel extends ChangeNotifier {
     return _currentAcademicWeek!;
   }
 
-  // ========== МЕТОДЫ ДЛЯ РАБОТЫ С РАСПИСАНИЕМ ==========
 
   List<Schedule> getScheduleForDayAndWeek(
     Map<String, List<Schedule>>? schedules,
@@ -345,14 +337,12 @@ class MainTeacherModel extends ChangeNotifier {
     return allAnnouncements;
   }
 
-  // ОСНОВНОЙ МЕТОД ДЛЯ ПОЛУЧЕНИЯ РАСПИСАНИЯ (только обычные занятия + объявления)
   List<Schedule> getAllSchedulesForDay(
     Map<String, List<Schedule>>? schedules,
     String dayName,
     int weekNumber,
     String date,
   ) {
-    // Проверяем, нужно ли показывать расписание для этой даты
     try {
       final targetDate = parseDate(date);
       if (!shouldShowScheduleForDate(targetDate)) {
@@ -360,7 +350,6 @@ class MainTeacherModel extends ChangeNotifier {
       }
     } catch (e) {}
 
-    // Получаем регулярные занятия с фильтрацией по неделям и датам
     final regularSchedules = getScheduleForDayAndWeek(
       schedules,
       dayName,
@@ -368,10 +357,8 @@ class MainTeacherModel extends ChangeNotifier {
       date,
     );
     
-    // Получаем объявления для этой даты
     final announcements = getAnnouncementsForDate(date, schedules);
 
-    // ФИЛЬТРУЕМ ЭКЗАМЕНЫ И КОНСУЛЬТАЦИИ (не показываем их в обычном расписании)
     final filteredRegularSchedules = regularSchedules.where((schedule) {
       final lessonType = schedule.lessonTypeAbbrev?.toLowerCase() ?? '';
       final isExam = schedule.lessonTypeAbbrev == 'экз' || 
@@ -393,7 +380,6 @@ class MainTeacherModel extends ChangeNotifier {
     return allSchedules;
   }
 
-  // Метод для получения экзаменов
   List<Schedule> getExamsForDate(String date, List<Schedule>? exams) {
     if (exams == null) return [];
 
@@ -431,7 +417,6 @@ class MainTeacherModel extends ChangeNotifier {
     }).toList();
   }
 
-  // Метод для старого API (для обратной совместимости)
   List<Schedule> getAllSchedulesForDayAuto(
     Map<String, List<Schedule>>? schedules,
     List<Schedule>? exams,
@@ -439,7 +424,6 @@ class MainTeacherModel extends ChangeNotifier {
     int weekNumber,
     String date,
   ) {
-    // Просто используем основной метод без экзаменов
     return getAllSchedulesForDay(schedules, dayName, weekNumber, date);
   }
 
@@ -470,7 +454,6 @@ class MainTeacherModel extends ChangeNotifier {
     return true;
   }
 
-  // ========== МЕТОДЫ ДЛЯ ПОЛУЧЕНИЯ ИНФОРМАЦИИ О ПРЕПОДАВАТЕЛЕ ==========
 
   String getEmployeeNameFromList(List<Employee>? employees) {
     if (employees == null || employees.isEmpty) return '';
@@ -490,7 +473,6 @@ class MainTeacherModel extends ChangeNotifier {
     return '$lastName ${firstName[0]}.$middleInitial';
   }
 
-  // ========== МЕТОДЫ ДЛЯ ПОЛУЧЕНИЯ ИНФОРМАЦИИ О ЗАНЯТИИ ==========
 
   String getGroupsForSchedule(Schedule schedule) {
     if (schedule.studentGroups != null && schedule.studentGroups!.isNotEmpty) {
@@ -525,7 +507,6 @@ class MainTeacherModel extends ChangeNotifier {
     return schedule.startLessonDate ?? '';
   }
 
-  // ========== МЕТОДЫ ДЛЯ ПРОВЕРКИ СОСТОЯНИЯ ==========
 
   bool hasData() {
     return _mainGroup != null;
@@ -611,7 +592,6 @@ class MainTeacherModel extends ChangeNotifier {
     return '$lastName ${firstName.isNotEmpty ? '${firstName[0]}.' : ''}${middleName.isNotEmpty ? '${middleName[0]}.' : ''}'.trim();
   }
 
-  // ========== МЕТОДЫ ДЛЯ ДАТЫ ОТОБРАЖЕНИЯ ==========
 
   DateTime getStartDisplayDate() {
     final now = DateTime.now();

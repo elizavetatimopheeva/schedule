@@ -20,7 +20,6 @@ class DaySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data.schedules.isEmpty) return const SizedBox.shrink();
-
     return Container(
       margin: const EdgeInsets.all(8),
       child: Column(

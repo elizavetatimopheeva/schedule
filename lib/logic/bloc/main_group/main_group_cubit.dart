@@ -13,7 +13,6 @@ class MainGroupCubit extends Cubit<MainGroupState> {
 
   MainGroupCubit({required this.groupNumber}) : super(MainGroupInitial());
 
-
   MainGroupData _determineInitialViewType(MainGroupData state) {
     if (isSemesterEnded(state)) {
       return state.copyWith(selectedViewType: ScheduleViewType.exams);
@@ -21,16 +20,14 @@ class MainGroupCubit extends Cubit<MainGroupState> {
     return state;
   }
 
-  // Переключение избранного
   Future<void> toggleFavorite() async {
     if (state is MainGroupData) {
       final currentState = state as MainGroupData;
-      await FavoriteService.toggleFavorite(groupNumber.toString());
+      await FavoriteGroupService.toggleFavorite(groupNumber.toString());
       emit(currentState.copyWith(isFavorite: !currentState.isFavorite));
     }
   }
 
-  // Смена типа просмотра
   void changeViewType(ScheduleViewType viewType) {
     if (state is MainGroupData) {
       final currentState = state as MainGroupData;
@@ -38,7 +35,6 @@ class MainGroupCubit extends Cubit<MainGroupState> {
     }
   }
 
-  // Загрузка дополнительных недель
   void loadMoreWeeks() {
     if (state is MainGroupData) {
       final currentState = state as MainGroupData;
@@ -48,7 +44,6 @@ class MainGroupCubit extends Cubit<MainGroupState> {
     }
   }
 
-  // Проверка доступности дополнительных недель
   void checkMoreWeeksAvailability() {
     if (state is MainGroupData) {
       final currentState = state as MainGroupData;
@@ -81,13 +76,17 @@ class MainGroupCubit extends Cubit<MainGroupState> {
     }
   }
 
-  // ========== МЕТОДЫ ДЛЯ РАБОТЫ С ДАТАМИ ==========
-
   DateTime _getMondayForWeek(MainGroupData state, int weekOffset) {
     final now = DateTime.now();
     final baseOffset = getBaseWeekOffset(state);
 
-    final baseMonday = DateUtils.getMonday(now);
+    DateTime referenceDate = now;
+
+    if (now.weekday == DateTime.sunday) {
+      referenceDate = now.add(const Duration(days: 1));
+    }
+
+    final baseMonday = MyDateUtils.getMonday(referenceDate);
 
     return baseMonday.add(Duration(days: (baseOffset + weekOffset) * 7));
   }
@@ -104,17 +103,13 @@ class MainGroupCubit extends Cubit<MainGroupState> {
     if (startDateStr == null || startDateStr.isEmpty) return 0;
 
     final now = DateTime.now();
-    final startDate = DateUtils.parseDate(startDateStr);
+    final startDate = MyDateUtils.parseDate(startDateStr);
 
-    final currentMonday = DateUtils.getMonday(now);
-    final semesterMonday = DateUtils.getMonday(startDate);
+    final currentMonday = MyDateUtils.getMonday(now);
+    final semesterMonday = MyDateUtils.getMonday(startDate);
 
     final diffDays = semesterMonday.difference(currentMonday).inDays;
     return diffDays > 0 ? diffDays ~/ 7 : 0;
-  }
-
-  String getDateForCurrentWeekDay(MainGroupData state, String dayName) {
-    return _getDateForWeekDay(state, 0, dayName);
   }
 
   String getDateForFutureWeekDay(
@@ -132,14 +127,14 @@ class MainGroupCubit extends Cubit<MainGroupState> {
   ) {
     final monday = _getMondayForWeek(state, weekOffset);
 
-    final targetWeekday = DateUtils.getWeekdayNumber(dayName);
+    final targetWeekday = MyDateUtils.getWeekdayNumber(dayName);
     int dayDifference = targetWeekday - 1;
     final targetDate = monday.add(Duration(days: dayDifference));
 
-    final dateString = DateUtils.formatDate(targetDate);
+    final dateString = MyDateUtils.formatDate(targetDate);
     final endDate = state.mainGroup.endDate;
 
-    if (endDate != null && !DateUtils.isDateValid(targetDate, endDate)) {
+    if (endDate != null && !MyDateUtils.isDateValid(targetDate, endDate)) {
       return dateString;
     }
 
@@ -160,38 +155,13 @@ class MainGroupCubit extends Cubit<MainGroupState> {
 
   bool _isDayValidForWeek(MainGroupData state, int weekOffset, String dayName) {
     final monday = _getMondayForWeek(state, weekOffset);
-    final targetWeekday = DateUtils.getWeekdayNumber(dayName);
+    final targetWeekday = MyDateUtils.getWeekdayNumber(dayName);
     int dayDifference = targetWeekday - 1;
     final targetDate = monday.add(Duration(days: dayDifference));
     final endDate = state.mainGroup.endDate;
 
     if (endDate != null) {
-      return DateUtils.isDateValid(targetDate, endDate);
-    }
-
-    return true;
-  }
-
-  bool shouldShowScheduleForDate(MainGroupData state, DateTime date) {
-    final startDateStr = state.mainGroup.startDate;
-    final endDateStr = state.mainGroup.endDate;
-
-    if (startDateStr != null && startDateStr.isNotEmpty) {
-      try {
-        final startDate = DateUtils.parseDate(startDateStr);
-        if (date.isBefore(startDate)) {
-          return false;
-        }
-      } catch (e) {}
-    }
-
-    if (endDateStr != null && endDateStr.isNotEmpty) {
-      try {
-        final endDate = DateUtils.parseDate(endDateStr);
-        if (date.isAfter(endDate)) {
-          return false;
-        }
-      } catch (e) {}
+      return MyDateUtils.isDateValid(targetDate, endDate);
     }
 
     return true;
@@ -203,11 +173,19 @@ class MainGroupCubit extends Cubit<MainGroupState> {
 
   int getWeekNumberForFutureWeek(MainGroupData state, int weekOffset) {
     final baseOffset = getBaseWeekOffset(state);
-    return ((state.currentAcademicWeek - 1 + baseOffset + weekOffset) % 4) + 1;
-  }
 
-  int getAbsoluteWeekNumberForDisplay(MainGroupData state, int weekOffset) {
-    return state.currentAcademicWeek + weekOffset;
+    int sundayShift = 0;
+    if (DateTime.now().weekday == DateTime.sunday) {
+      sundayShift = 1;
+    }
+
+    return ((state.currentAcademicWeek -
+                1 +
+                baseOffset +
+                weekOffset +
+                sundayShift) %
+            4) +
+        1;
   }
 
   DateTime getStartDisplayDate(MainGroupData state) {
@@ -216,26 +194,13 @@ class MainGroupCubit extends Cubit<MainGroupState> {
 
     if (startDateStr != null && startDateStr.isNotEmpty) {
       try {
-        final startDate = DateUtils.parseDate(startDateStr);
+        final startDate = MyDateUtils.parseDate(startDateStr);
         final displayDate = startDate.isAfter(now) ? startDate : now;
         return displayDate;
       } catch (e) {}
     }
 
     return now;
-  }
-
-  DateTime getMinDisplayDate(MainGroupData state) {
-    final startDateStr = state.mainGroup.startDate;
-
-    if (startDateStr != null && startDateStr.isNotEmpty) {
-      try {
-        final startDate = DateUtils.parseDate(startDateStr);
-        return startDate;
-      } catch (e) {}
-    }
-
-    return DateTime.now();
   }
 
   bool hasSemesterStarted([MainGroupData? state]) {
@@ -247,7 +212,7 @@ class MainGroupCubit extends Cubit<MainGroupState> {
 
     if (startDateStr != null && startDateStr.isNotEmpty) {
       try {
-        final startDate = DateUtils.parseDate(startDateStr);
+        final startDate = MyDateUtils.parseDate(startDateStr);
         return now.isAfter(startDate) || now.isAtSameMomentAs(startDate);
       } catch (e) {
         return true;
@@ -266,7 +231,7 @@ class MainGroupCubit extends Cubit<MainGroupState> {
 
     if (endDateStr != null && endDateStr.isNotEmpty) {
       try {
-        final endDate = DateUtils.parseDate(endDateStr);
+        final endDate = MyDateUtils.parseDate(endDateStr);
         return now.isAfter(endDate);
       } catch (e) {
         return true;
@@ -276,86 +241,72 @@ class MainGroupCubit extends Cubit<MainGroupState> {
     return true;
   }
 
-// В класс MainGroupCubit добавляем:
+  Future<void> loadMainGroup() async {
+    emit(MainGroupLoading());
 
-Future<void> loadSubgroupFilter() async {
-  if (state is MainGroupData) {
-    final currentState = state as MainGroupData;
-    final filter = await SubgroupService.getSubgroupFilter(groupNumber.toString());
-    emit(currentState.copyWith(subgroupFilter: filter));
-  }
-}
+    try {
+      final currentAcademicWeek = await _apiClient.getCurrentWeek();
+      final group = await _apiClient.getScheduleResponse(groupNumber);
+      final isFavorite = await FavoriteGroupService.isFavoriteGroup(
+        groupNumber.toString(),
+      );
+      final subgroupFilter = await SubgroupService.getSubgroupFilter(
+        groupNumber.toString(),
+      );
 
-// Переопределяем loadMainGroup для загрузки фильтра подгруппы
-@override
-Future<void> loadMainGroup() async {
-  emit(MainGroupLoading());
+      final dataState = MainGroupData(
+        mainGroup: group,
+        currentAcademicWeek: currentAcademicWeek,
+        isFavorite: isFavorite,
+        subgroupFilter: subgroupFilter,
+      );
 
-  try {
-    final currentAcademicWeek = await _apiClient.getCurrentWeek();
-    final group = await _apiClient.getScheduleResponse(groupNumber);
-    final isFavorite = await FavoriteService.isFavorite(groupNumber.toString());
-    final subgroupFilter = await SubgroupService.getSubgroupFilter(groupNumber.toString());
-
-    final dataState = MainGroupData(
-      mainGroup: group,
-      currentAcademicWeek: currentAcademicWeek,
-      isFavorite: isFavorite,
-      subgroupFilter: subgroupFilter,
-    );
-
-    final updatedState = _determineInitialViewType(dataState);
-    emit(updatedState);
-  } catch (e) {
-    emit(MainGroupError('Ошибка загрузки расписания: ${e.toString()}'));
-  }
-}
-
-// Метод для изменения фильтра подгруппы
-Future<void> changeSubgroupFilter(SubgroupFilter filter) async {
-  if (state is MainGroupData) {
-    final currentState = state as MainGroupData;
-    
-    // Сохраняем в Hive
-    await SubgroupService.setSubgroupFilter(groupNumber.toString(), filter);
-    
-    // Обновляем состояние
-    emit(currentState.copyWith(subgroupFilter: filter));
-  }
-}
-
-// Метод для фильтрации расписания по подгруппе
-List<Schedule> filterSchedulesBySubgroup(List<Schedule> schedules, SubgroupFilter filter) {
-  if (filter == SubgroupFilter.all) {
-    return schedules;
-  }
-  
-  final subgroupNumber = filter.subgroupNumber;
-  return schedules.where((schedule) {
-    // Если у занятия нет номера подгруппы (0 или null), показываем всем
-    if (schedule.numSubgroup == null || schedule.numSubgroup == 0) {
-      return true;
+      final updatedState = _determineInitialViewType(dataState);
+      emit(updatedState);
+    } catch (e) {
+      emit(MainGroupError());
     }
-    // Иначе показываем только для выбранной подгруппы
-    return schedule.numSubgroup == subgroupNumber;
-  }).toList();
-}
-
-// Метод для фильтрации DisplaySchedule по подгруппе
-List<DisplaySchedule> filterDisplaySchedulesBySubgroup(
-  List<DisplaySchedule> schedules, 
-  SubgroupFilter filter
-) {
-  if (filter == SubgroupFilter.all) {
-    return schedules;
   }
-  
-  final subgroupNumber = filter.subgroupNumber;
-  return schedules.where((schedule) {
-    if (schedule.original.numSubgroup == null || schedule.original.numSubgroup == 0) {
-      return true;
+
+  Future<void> changeSubgroupFilter(SubgroupType filter) async {
+    if (state is MainGroupData) {
+      final currentState = state as MainGroupData;
+      await SubgroupService.setSubgroupFilter(groupNumber.toString(), filter);
+      emit(currentState.copyWith(subgroupFilter: filter));
     }
-    return schedule.original.numSubgroup == subgroupNumber;
-  }).toList();
-}
+  }
+
+  List<Schedule> filterSchedulesBySubgroup(
+    List<Schedule> schedules,
+    SubgroupType filter,
+  ) {
+    if (filter == SubgroupType.all) {
+      return schedules;
+    }
+
+    final subgroupNumber = filter.subgroupNumber;
+    return schedules.where((schedule) {
+      if (schedule.numSubgroup == null || schedule.numSubgroup == 0) {
+        return true;
+      }
+      return schedule.numSubgroup == subgroupNumber;
+    }).toList();
+  }
+
+  List<DisplaySchedule> filterDisplaySchedulesBySubgroup(
+    List<DisplaySchedule> schedules,
+    SubgroupType filter,
+  ) {
+    if (filter == SubgroupType.all) {
+      return schedules;
+    }
+
+    final subgroupNumber = filter.subgroupNumber;
+    return schedules.where((schedule) {
+      if (schedule.subgroupNumber == 0) {
+        return true;
+      }
+      return schedule.subgroupNumber == subgroupNumber;
+    }).toList();
+  }
 }

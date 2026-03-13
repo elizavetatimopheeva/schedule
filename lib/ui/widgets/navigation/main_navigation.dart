@@ -1,96 +1,24 @@
-// import 'package:bsuir/ui/widgets/app/main_screen/main_screen_model.dart';
-// import 'package:bsuir/ui/widgets/app/main_screen/main_screen_widget.dart';
-// import 'package:bsuir/ui/widgets/app/main_teacher/main_teacher_model.dart';
-// import 'package:bsuir/ui/widgets/app/main_teacher/main_teacher_widget.dart';
-// import 'package:bsuir/ui/widgets/inherited/helper.dart';
-// import 'package:bsuir/ui/widgets/inherited/provider.dart';
-// import 'package:bsuir/ui/widgets/app/main_group/main_group_model.dart';
-// import 'package:bsuir/ui/widgets/app/main_group/main_group_widget.dart';
-// import 'package:flutter/material.dart';
-
-// abstract class MainNavigationRouteNames {
-//   static const mainGroup = '/lessons';
-//   static const mainTeacher = '/teacher';
-//   static const mainScreen = '/';
-//   static const helper = '/helper';
-// }
-
-// class MainNavigation {
-//   String initialRoute(bool isFavourite) => isFavourite
-//       ? MainNavigationRouteNames.mainGroup
-//       : MainNavigationRouteNames.mainScreen;
-
-//   final routes = <String, Widget Function(BuildContext)>{
-//     MainNavigationRouteNames.mainScreen: (context) => NotifierProvider(
-//       create: () => MainScreenModel(),
-//       child: MainScreenWidget(),
-//     ),
-//     // MainNavigationRouteNames.helper: (context) => NotifierProvider(
-//     //   create: () => MainScreenModel(),
-//     //   child: GroupScheduleScreen(),)
-//   };
-
-//   Route<Object> onGenerateRoute(RouteSettings settings) {
-//     switch (settings.name) {
-//       case MainNavigationRouteNames.mainGroup:
-//         final arguments = settings.arguments;
-//         final groupNumber = arguments is int ? arguments : 0;
-//         return MaterialPageRoute(
-//           builder: (context) {
-//             return NotifierProvider(
-//               create: () => MainGroupModel(groupNumber),
-//               child: MainGroupScheduleWidget(),
-//             );
-//           },
-//         );
-//         case MainNavigationRouteNames.mainTeacher:
-//         final arguments = settings.arguments;
-//         final urlId = arguments is String ? arguments : '';
-//         return MaterialPageRoute(
-//           builder: (context) {
-//             return NotifierProvider(
-//               create: () => MainTeacherModel(urlId),
-//               child: MainTeacherScheduleWidget(),
-//             );
-//           },
-//         );
-//       default:
-//         const widget = Text('Navigation Error!');
-//         return MaterialPageRoute(builder: (context) => widget);
-//     }
-//   }
-// }
-
-
-
 import 'package:bsuir/logic/bloc/main_group/main_group_cubit.dart';
 import 'package:bsuir/ui/widgets/app/main_screen/main_screen_model.dart';
 import 'package:bsuir/ui/widgets/app/main_screen/main_screen_widget.dart';
 import 'package:bsuir/ui/widgets/app/main_teacher/main_teacher_model.dart';
 import 'package:bsuir/ui/widgets/app/main_teacher/main_teacher_widget.dart';
-import 'package:bsuir/ui/widgets/inherited/helper.dart';
 import 'package:bsuir/ui/widgets/inherited/provider.dart';
-import 'package:bsuir/ui/widgets/app/main_group/main_group_model.dart';
 import 'package:bsuir/ui/widgets/app/main_group/main_group_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class MainNavigationRouteNames {
-  static const mainGroup = '/lessons';
+  static const mainGroup = '/group';
   static const mainTeacher = '/teacher';
   static const mainScreen = '/';
-  static const helper = '/helper';
 }
 
 class MainNavigation {
-  String initialRoute(bool isFavourite) => isFavourite
-      ? MainNavigationRouteNames.mainGroup
-      : MainNavigationRouteNames.mainScreen;
-
   final routes = <String, Widget Function(BuildContext)>{
     MainNavigationRouteNames.mainScreen: (context) => NotifierProvider(
       create: () => MainScreenModel(),
-      child: MainScreenWidget(),
+      child: const MainScreenWidget(), 
     ),
   };
 
@@ -100,13 +28,13 @@ class MainNavigation {
         final arguments = settings.arguments;
         final groupNumber = arguments is int ? arguments : 0;
         return MaterialPageRoute(
-        builder: (context) {
-          return BlocProvider(
-            create: (context) => MainGroupCubit(groupNumber: groupNumber),
-            child: MainGroupScheduleWidget(groupNumber: groupNumber,),
-          );
-        },
-      );
+          builder: (context) {
+            return BlocProvider(
+              create: (context) => MainGroupCubit(groupNumber: groupNumber),
+              child: MainGroupScheduleWidget(groupNumber: groupNumber),
+            );
+          },
+        );
         
       case MainNavigationRouteNames.mainTeacher:
         final arguments = settings.arguments;
@@ -115,14 +43,19 @@ class MainNavigation {
           builder: (context) {
             return NotifierProvider(
               create: () => MainTeacherModel(urlId),
-              child: MainTeacherScheduleWidget(),
+              child: const MainTeacherScheduleWidget(),
             );
           },
         );
 
       default:
-        const widget = Text('Navigation Error!');
-        return MaterialPageRoute(builder: (context) => widget);
+        return MaterialPageRoute(
+          builder: (context) => const Scaffold(
+            body: Center(
+              child: Text('Что-то пошло не так, перезапустите приложение'),
+            ),
+          ),
+        );
     }
   }
 }

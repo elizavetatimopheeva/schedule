@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-class DateUtils {
+class MyDateUtils {
   static DateTime parseDate(String dateStr) {
     return DateFormat('dd.MM.yyyy').parse(dateStr);
   }
@@ -77,8 +77,8 @@ class DateUtils {
 
   static bool isTodayDate(DateTime date) {
     final now = DateTime.now();
-    return now.year == date.year && 
-           now.month == date.month && 
-           now.day == date.day;
+    return now.year == date.year &&
+        now.month == date.month &&
+        now.day == date.day;
   }
 }

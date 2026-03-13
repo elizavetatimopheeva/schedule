@@ -4,6 +4,7 @@ import 'package:bsuir/ui/widgets/app/search_widget/search_group_widget.dart.dart
 import 'package:bsuir/ui/widgets/app/search_widget/search_group_model.dart';
 import 'package:bsuir/ui/widgets/app/search_widget/search_teacher_model.dart';
 import 'package:bsuir/ui/widgets/app/search_widget/search_teacher_widget.dart';
+import 'package:bsuir/ui/widgets/app/settings_widget/settings_widget.dart';
 import 'package:bsuir/ui/widgets/inherited/provider.dart';
 import 'package:flutter/material.dart';
 
@@ -64,28 +65,19 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
       body: IndexedStack(
         index: _selectedTab,
         children: [
-          // SearchGroupModelProvider(
-          //   model: getGroupModel,
-          //   child: const SearchGroupWidget(),
-          // ),
-NotifierProvider(
+          NotifierProvider(
             create: () => getGroupModel,
             isManagingModel: false,
             child: const SearchGroupWidget(),
           ),
 
-          
           NotifierProvider(
             create: () => getTeacherModel,
             isManagingModel: false,
             child: const SearchTeacherWidget(),
           ),
 
-          // SearchTeacherModelProvider(
-          //   model: getTeacherModel,
-          //   child: const SearchTeacherWidget(),
-          // ),
-          Text('WWWWWWWWWWWW'),
+          SettingsWidget()
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -110,8 +102,9 @@ NotifierProvider(
 
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Группы'),
+
           BottomNavigationBarItem(
-            icon: Icon(Icons.card_membership),
+            icon: Icon(Icons.school),
             label: 'Преподаватели',
           ),
           BottomNavigationBarItem(
