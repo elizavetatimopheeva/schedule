@@ -1,19 +1,9 @@
-# Schedule
+# Расписание
 
-A new Flutter project.
+Мобильное приложение для просмотра расписания занятий студентов БГУИР. Приложение позволяет отслеживать расписание групп, экзамены, консультации и объявления, с возможностью фильтрации по подгруппам и сохранения избранных групп. В данном проекте реализуются:
 
-## Getting Started
+![Image](https://github.com/user-attachments/assets/a988696d-ab2b-44a4-99a8-2063f176abf8)
 
-This project is a starting point for a Flutter application.
+![Image](https://github.com/user-attachments/assets/84ccf9ac-5b32-433a-8a64-0654c29f7448)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-
-<video src="assets/images/animation.mp4" controls width="600"></video>
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![Image](https://github.com/user-attachments/assets/449e49ff-2eb9-495b-8812-841475b01f15)
